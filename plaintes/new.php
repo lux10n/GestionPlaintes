@@ -70,7 +70,7 @@
                     }
                 }
             }
-            $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$plaignantId."', '".$_POST['date_plainte']."', '".$_POST['objet_plainte']."', '".$_POST['description_plainte']."', '".$_POST['mode_emission_plainte']."')";
+            $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$plaignantId."', '".htmlentities($_POST['date_plainte'])."', '".htmlentities($_POST['objet_plainte'])."', '".htmlentities($_POST['description_plainte'])."', '".htmlentities($_POST['mode_emission_plainte'])."')";
             if (mysqli_query($conn, $sql)) {
                 echo('<script>alert("Plainte enregistrée avec succès.")</script>');
             } else {
