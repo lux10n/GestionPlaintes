@@ -1,4 +1,8 @@
 <?php 
+    session_start();
+    if(!isset($_SESSION['NumPlaignant'])){
+        header('Location: ../login.php');
+    }
     $db_host="localhost";
     $db_user="root";
     $db_password="";
@@ -19,64 +23,23 @@
                 $result = mysqli_query($conn, $sql2);
                 if (mysqli_num_rows($result) > 0) {
                     while($row = mysqli_fetch_assoc($result)) {
-                        $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES (
-                                '".$row['NumPlaignant']."', '".$_POST['date_plainte']."', '".$_POST['objet_plainte']."', 
-                                '".$_POST['description_plainte']."', '".$_POST['mode_emission_plainte']."')
-                        ";
-                        if (mysqli_query($conn, $sql)) {
-                            echo('<script>alert("Plainte enregistrée avec succès.")</script>');
-                        }
+                        $numPlaignantToUse=$row['NumPlaignant'];
                     }
-                }        
+                }else{
+                    $numPlaignantToUse=$_SESSION['NumPlaignant'];
+                }
             } else {
-                echo('<script>alert("Erreur lors de l\'enregistrement.")</script>');
-                // echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+                $numPlaignantToUse=$_SESSION['NumPlaignant'];
             }
         }else{
-            $plaignantId=0;
-            if(isset($_POST['num_plaignant']) && $_POST['num_found']=="true"){
-                // update values of plaignant
-                $sql1 = "UPDATE Plaignant SET 
-                NomPlaignant='".$_POST['nom_plaignant']."',
-                AdressePlaignant='".$_POST['adresse_plaignant']."',
-                EmailPlaignant='".$_POST['email_plaignant']."',
-                TelPlaignant='".$_POST['tel_plaignant']."'
-                WHERE 'NumPlaignant'='".$_POST['num_plaignant']."'";
-                echo $sql1;
-                if (mysqli_query($conn, $sql1)) {
-                    $plaignantId=$_POST['num_plaignant'];
-                }else{
-                    $sql1 = "INSERT INTO Plaignant (NomPlaignant, AdressePlaignant, EmailPlaignant, TelPlaignant, Anonyme) VALUES ('".$_POST['nom_plaignant']."', '".$_POST['adresse_plaignant']."', '".$_POST['email_plaignant']."', '".$_POST['tel_plaignant']."', 0)";
-                    if (mysqli_query($conn, $sql1)) {
-                        $sql2 = "SELECT * FROM Plaignant WHERE NomPlaignant='".$_POST['nom_plaignant']."' AND AdressePlaignant='".$_POST['adresse_plaignant']."' AND EmailPlaignant='".$_POST['email_plaignant']."' AND TelPlaignant='".$_POST['tel_plaignant']."' AND Anonyme='0' ORDER BY NumPlaignant DESC LIMIT 1";
-                        $result = mysqli_query($conn, $sql2);
-                        if (mysqli_num_rows($result) > 0) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                $plaignantId=$row['NumPlaignant'];
-                            }
-                        }
-                    }    
-                }
-            }else{
-                // create new plaignant
-                $sql1 = "INSERT INTO Plaignant (NomPlaignant, AdressePlaignant, EmailPlaignant, TelPlaignant, Anonyme) VALUES ('".$_POST['nom_plaignant']."', '".$_POST['adresse_plaignant']."', '".$_POST['email_plaignant']."', '".$_POST['tel_plaignant']."', 0)";
-                if (mysqli_query($conn, $sql1)) {
-                    $sql2 = "SELECT * FROM Plaignant WHERE NomPlaignant='".$_POST['nom_plaignant']."' AND AdressePlaignant='".$_POST['adresse_plaignant']."' AND EmailPlaignant='".$_POST['email_plaignant']."' AND TelPlaignant='".$_POST['tel_plaignant']."' AND Anonyme='0' ORDER BY NumPlaignant DESC LIMIT 1";
-                    $result = mysqli_query($conn, $sql2);
-                    if (mysqli_num_rows($result) > 0) {
-                        while($row = mysqli_fetch_assoc($result)) {
-                            $plaignantId=$row['NumPlaignant'];
-                        }
-                    }
-                }
-            }
-            $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$plaignantId."', '".htmlentities($_POST['date_plainte'])."', '".htmlentities($_POST['objet_plainte'])."', '".htmlentities($_POST['description_plainte'])."', '".htmlentities($_POST['mode_emission_plainte'])."')";
-            if (mysqli_query($conn, $sql)) {
-                echo('<script>alert("Plainte enregistrée avec succès.")</script>');
-            } else {
-                echo('<script>alert("Erreur lors de l\'enregistrement.")</script>');
-                // echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-            }
+            $numPlaignantToUse=$_SESSION['NumPlaignant'];
+        }
+        $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$numPlaignantToUse."', '".htmlentities($_POST['date_plainte'])."', '".htmlentities($_POST['objet_plainte'])."', '".htmlentities($_POST['description_plainte'])."', '".htmlentities($_POST['mode_emission_plainte'])."')";
+        if (mysqli_query($conn, $sql)) {
+            echo('<script>alert("Plainte enregistrée avec succès.")</script>');
+        } else {
+            echo('<script>alert("Erreur lors de l\'enregistrement.")</script>');
+            // echo "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
     }
 ?>
@@ -109,38 +72,36 @@
             </div>
         </div>
 
-        <fieldset class="plaignantId">
+        <fieldset class="plaignantId" disabled>
             <h3 class="pt-4 pb-2">Identification Plaignant</h3>
             <div class="form-group row mb-3">
                 <label class="col-sm-3 col-form-label">Numéro</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="num_plaignant">
-                    <input type="hidden" name="num_found" value="false">
-                    <p class="num_not_found text-danger mb-0">Numéro du Plaignant non trouvé !<br>Veuillez laisser vide pour un nouveau plaignant.</p>
+                    <input type="text" class="form-control" name="num_plaignant" value="PL-<?php echo $_SESSION['NumPlaignant'];?>"required>
                 </div>
             </div>
             <div class="form-group row mb-3">
                 <label class="col-sm-3 col-form-label">Nom</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="nom_plaignant" required>
+                    <input type="text" class="form-control" name="nom_plaignant" value="<?php echo $_SESSION['NomPlaignant'];?>"required>
                 </div>
             </div>
             <div class="form-group row mb-3">
                 <label class="col-sm-3 col-form-label">Adresse</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="adresse_plaignant" required>
+                    <input type="text" class="form-control" name="adresse_plaignant" value="<?php echo $_SESSION['AdressePlaignant'];?>"required>
                 </div>
             </div>
             <div class="form-group row mb-3">
                 <label class="col-sm-3 col-form-label">Mail</label>
                 <div class="col-sm-9">
-                    <input type="email" class="form-control" name="email_plaignant" required>
+                    <input type="email" class="form-control" name="email_plaignant" value="<?php echo $_SESSION['EmailPlaignant'];?>"required>
                 </div>
             </div>
             <div class="form-group row mb-3">
                 <label class="col-sm-3 col-form-label">Téléphone</label>
                 <div class="col-sm-9">
-                    <input type="tel" class="form-control" name="tel_plaignant" required>
+                    <input type="tel" class="form-control" name="tel_plaignant" value="<?php echo $_SESSION['TelPlaignant'];?>"required>
                 </div>
             </div>        
         </fieldset>
@@ -201,68 +162,18 @@
                 e.preventDefault();
                 e.stopPropagation();
                 $('form').trigger('reset');
-                $('input[name="num_found"]').val("false");
             })
-            var num_not_found=$(".num_not_found");
-            num_not_found.hide();
             anonymatSwitch=$('select[name="anonymat"]');
             anonymatSwitch.change(function(){
                 switch(anonymatSwitch.val()){
                     case 'yes':
-                        $('fieldset').attr('disabled',true);
-                        $('fieldset input').val('');
-                        num_not_found.hide();
+                        $('.plaignantId').hide();
                         break;
                     default:
-                        $('fieldset').attr('disabled',false);
-                        $('input[name="num_plaignant"]').attr('required',false);
-                        $('input[name="nom_plaignant"]').attr('required',true);
-                        $('input[name="adresse_plaignant"]').attr('required',true);
-                        $('input[name="email_plaignant"]').attr('required',true);
-                        $('input[name="tel_plaignant"]').attr('required',true);
+                        $('.plaignantId').show();
                         break;
                 }
             })
-
-            var typingTimer; //timer identifier
-            var doneTypingInterval = 1000; //time in ms, 5 second for example
-            var $input = $('input[name="num_plaignant"]');
-            console.log("$input = ", $input.length);
-            $input.on('keyup', function() {
-            console.log("Key up");
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(doneTyping, doneTypingInterval);
-            });
-            $input.on('keydown', function() {
-            console.log("Key down");
-            clearTimeout(typingTimer);
-            });
-            function doneTyping() {
-                ($input.val()) ? $.ajax({
-                    method: "GET",
-                    url: "/plaignants/find.php?n="+$input.val(),
-                    success: function(result){
-                        console.log(result);
-                        if(result.found=="true"){
-                            $('input[name="num_found"]').val("true");
-                            $('input[name="nom_plaignant"]').val(result.nom_plaignant);
-                            $('input[name="adresse_plaignant"]').val(result.adresse_plaignant);
-                            $('input[name="email_plaignant"]').val(result.email_plaignant);
-                            $('input[name="tel_plaignant"]').val(result.tel_plaignant);
-                            num_not_found.hide();
-                        }else{
-                            $('input[name="num_found"]').val("false");
-                            num_not_found.show();
-                        }
-                    },error: function(error){
-                        $('input[name="num_found"]').val("false");
-                        num_not_found.show();
-                    },complete: function(){
-                        console.log('ajax call and get user data done')
-                    }
-                }) : num_not_found.hide()
-            }
-
         });
     </script>
 
