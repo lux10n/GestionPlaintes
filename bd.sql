@@ -4,6 +4,8 @@ CREATE TABLE Plaignant(
     AdressePlaignant varchar(70) NOT NULL,
     EmailPlaignant varchar(70) NOT NULL,
     TelPlaignant varchar(70) NOT NULL,
+    UsernamePlaignant varchar(70) NOT NULL,
+    PasswordPlaignant varchar(255) NOT NULL,
     Anonyme int NOT NULL DEFAULT 0,
 
     PRIMARY KEY (NumPlaignant)
