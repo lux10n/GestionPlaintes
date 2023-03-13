@@ -1,7 +1,7 @@
 <?php 
     $db_host="localhost";
-    $db_user="root";
-    $db_password="";
+    $db_user="atomx";
+    $db_password="bruh669";
     $db_name="gestion_plaintes";
     $conn=mysqli_connect($db_host, $db_user, $db_password) or die('db connexion error');
     $db=mysqli_select_db($conn, 'gestion_plaintes') or die(mysqli_errno($conn));
