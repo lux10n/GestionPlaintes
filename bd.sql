@@ -16,6 +16,7 @@ CREATE TABLE Plainte(
     DatePlainte date NOT NULL,
     ObjetPlainte varchar(70) NOT NULL,
     DescriptionPlainte varchar(700) NOT NULL,
+    PieceJointePlainte varchar(255) NULL,
     ModeEmission varchar(70) NOT NULL,
 
     PRIMARY KEY (NumPlainte),
