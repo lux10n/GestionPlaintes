@@ -1,7 +1,7 @@
 <?php 
     $db_host="localhost";
-    $db_user="root";
-    $db_password="";
+    $db_user="atomx";
+    $db_password="bruh669";
     $db_name="gestion_plaintes";
     $conn=mysqli_connect($db_host, $db_user, $db_password) or die('db connexion error');
     $db=mysqli_select_db($conn, 'gestion_plaintes') or die(mysqli_errno($conn));
@@ -32,6 +32,7 @@
                         <th class='border text-center'>Objet</th>
                         <th class='border text-center'>Date</th>
                         <th class='border text-center'>Description</th>
+                        <th class='border text-center'>Pièce Jointe</th>
                         <th class='border text-center'>Mode d'émission</th>
                         <th class='border text-center'>Actions</th>
                     </tr>
@@ -56,16 +57,25 @@
                                     }
                                 }
                             }
+                            if(isset($row['PieceJointePlainte'])){
+                                $pj_plainte="<a class='btn btn-success' href='".str_rot13(base64_decode($row['PieceJointePlainte']))."' download>Voir &rarr;</a>";
+                            }else{
+                                $pj_plainte="N/A";
+                            }
                             echo "
                                 <tr>
                                     <td class='border text-center'>".$row['NumPlainte']."</td>
                                     <td class='border text-center'>".$row['NumPlaignant']."</td>
                                     <td class='border text-center'>".$nomPlaignant."</td>
-                                    <td class='border text-center'>".$row['ObjetPlainte']."</td>
+                                    <td class='border text-center'>".str_rot13(base64_decode($row['ObjetPlainte']))."</td>
                                     <td class='border text-center'>".$row['DatePlainte']."</td>
-                                    <td class='border text-center'>".substr($row['DescriptionPlainte'],0,20)."...</td>
-                                    <td class='border text-center'>".$modeEmission."</td>
-                                    <td class='border text-center'><button class='btn btn-success'>v</button></td>
+                                    <td class='border text-center'>".substr(str_rot13(base64_decode($row['DescriptionPlainte'])),0,20)."...</td>
+                                    <td class='border text-center'>".$pj_plainte."</td>
+                                    <td class='border text-center'>".$row['ModeEmission']."</td>
+                                    <td class='border text-center'>
+                                        <a class='btn btn-primary' href='receipt.php?id=".$row['NumPlainte']."'>Reçu</a>
+                                        <a class='btn btn-danger' href='delete.php?id=".$row['NumPlainte']."'>x</a>
+                                    </td>
                                 </tr>
                             ";
                         }
@@ -79,7 +89,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function(){
-            $('#dataTable').dataTable();
+            $('#dataTable').dataTable({
+                order: [[0, 'desc']],
+            });
         });
     </script>
 
