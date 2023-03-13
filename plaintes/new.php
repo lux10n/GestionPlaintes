@@ -1,12 +1,16 @@
 <?php 
+
+use PHPMailer\PHPMailer\PHPMailer;
     session_start();
     if(!isset($_SESSION['NumPlaignant'])){
         header('Location: ../login.php');
     }
+    require_once '../vendor/autoload.php';
     $db_host="localhost";
-    $db_user="root";
-    $db_password="";
+    $db_user="atomx";
+    $db_password="bruh669";
     $db_name="gestion_plaintes";
+    $target_dir='pieces_jointes/';
     $conn=mysqli_connect($db_host, $db_user, $db_password) or die('db connexion error');
     $db=mysqli_select_db($conn, 'gestion_plaintes') or die(mysqli_errno($conn));
     if(
@@ -34,8 +38,47 @@
         }else{
             $numPlaignantToUse=$_SESSION['NumPlaignant'];
         }
-        $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$numPlaignantToUse."', '".mysqli_real_escape_string($conn,$_POST['date_plainte'])."', '".mysqli_real_escape_string($conn,$_POST['objet_plainte'])."', '".mysqli_real_escape_string($conn,$_POST['description_plainte'])."', '".mysqli_real_escape_string($conn,$_POST['mode_emission_plainte'])."')";
+        if($_FILES["pj_plainte"]["name"]!="") {
+            var_dump($_FILES["pj_plainte"]);
+            $uploaded_file = $target_dir . basename($_FILES["pj_plainte"]["name"]);
+            if (move_uploaded_file($_FILES["pj_plainte"]["tmp_name"], $uploaded_file)) {
+                $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, PieceJointePlainte, ModeEmission) VALUES ('".$numPlaignantToUse."', '".mysqli_real_escape_string($conn,$_POST['date_plainte'])."', '".base64_encode(str_rot13(mysqli_real_escape_string($conn,$_POST['objet_plainte'])))."', '".base64_encode(str_rot13(mysqli_real_escape_string($conn,$_POST['description_plainte'])))."', '".base64_encode(str_rot13($uploaded_file))."', '".mysqli_real_escape_string($conn,$_POST['mode_emission_plainte'])."')";
+            }
+        }else{
+            $sql="INSERT INTO Plainte (NumPlaignant, DatePlainte, ObjetPlainte, DescriptionPlainte, ModeEmission) VALUES ('".$numPlaignantToUse."', '".mysqli_real_escape_string($conn,$_POST['date_plainte'])."', '".base64_encode(str_rot13(mysqli_real_escape_string($conn,$_POST['objet_plainte'])))."', '".base64_encode(str_rot13(mysqli_real_escape_string($conn,$_POST['description_plainte'])))."', '".mysqli_real_escape_string($conn,$_POST['mode_emission_plainte'])."')";
+        }
         if (mysqli_query($conn, $sql)) {
+            $mail = new PHPMailer;
+            $mail->isSMTP(); 
+            // $mail->SMTPDebug = 2;
+            $mail->Host = "mailer.cybersmart.co.za";
+            $mail->Port = 587; // TLS only
+            $mail->SMTPSecure = 'tls'; // ssl is depracated
+            $mail->SMTPAuth = true;
+            $mail->Username = "cbsporterville@cybersmart.co.za";
+            $mail->Password = "cbsporterville*";
+            $mail->setFrom("cbsporterville@cybersmart.co.za", "SYSTEME");
+            $mail->addAddress("ehuiadou3@gmail.com", "Administrateur");
+            $mail->Subject = 'Nouvelle Plainte - PLAINTES_SITW';
+            $mail->msgHTML("
+                <h1>Nouvelle Plainte</h1>
+                <p>Date : ".$_POST['date_plainte']."</p>
+                <p>Numéro Plaignant : PL-".$numPlaignantToUse."</p>
+                <p>Sujet : ".$_POST['objet_plainte']."</p>
+                <p>Mode d'émission : ".$_POST['mode_emission_plainte']."</p>
+                <p>Description : ".$_POST['description_plainte']."</p>
+                <p>Veuillez traiter cette plainte le plus tôt possible.</p>
+            ");
+            $mail->AltBody = 'Nouvelle Plainte, vérifiez votre système.';
+            if(!$mail->send()){
+                echo "Mailer Error: " . $mail->ErrorInfo;
+            }else{
+                echo "Message sent!";
+            }
+
+            header('Location: receipt.php?id='.mysqli_insert_id($conn));
+
+
             echo('<script>alert("Plainte enregistrée avec succès.")</script>');
         } else {
             echo('<script>alert("Erreur lors de l\'enregistrement.")</script>');
@@ -58,7 +101,7 @@
         <a href="/plaintes/list.php">Liste des plaintes &rarr;</a>
     </p>
 
-    <form method="POST" action="" class="w-50 mx-auto px-3">
+    <form method="POST" action="" class="w-50 mx-auto px-3" enctype="multipart/form-data">
 
         <div class="anonymat">
             <div class="form-group row mb-3">
@@ -129,6 +172,12 @@
                     <label class="col-sm-3 col-form-label">Description (1500 caractères max)</label>
                     <div class="col-sm-9">
                         <textarea class="form-control" name="description_plainte" rows="5"></textarea required>
+                    </div>
+                </div>
+                <div class="form-group row mb-3">
+                    <label class="col-sm-3 col-form-label">Pièce Jointe</label>
+                    <div class="col-sm-9">
+                        <input type="file" class="form-control" name="pj_plainte">
                     </div>
                 </div>
                 <div class="form-group row mb-3">
