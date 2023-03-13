@@ -22,7 +22,7 @@
         <a href="/plaintes/new.php">Soumettre une plainte &rarr;</a>
     </p>
     <div class="row">
-        <div class="col-lg-9 mx-auto">
+        <div class="col-lg-11 mx-auto">
             <table id="dataTable" class="dt table table-responsive border">
                 <thead>
                     <tr>
