@@ -1,11 +1,11 @@
 CREATE TABLE Plaignant(
     NumPlaignant int NOT NULL AUTO_INCREMENT,
-    NomPlaignant varchar(70) NOT NULL,
-    AdressePlaignant varchar(70) NOT NULL,
-    EmailPlaignant varchar(70) NOT NULL,
-    TelPlaignant varchar(70) NOT NULL,
-    UsernamePlaignant varchar(70) NOT NULL,
-    PasswordPlaignant varchar(255) NOT NULL,
+    NomPlaignant varchar(70) NULL,
+    AdressePlaignant varchar(70) NULL,
+    EmailPlaignant varchar(70) NULL,
+    TelPlaignant varchar(70) NULL,
+    UsernamePlaignant varchar(70) NULL,
+    PasswordPlaignant varchar(255) NULL,
     Anonyme int NOT NULL DEFAULT 0,
 
     PRIMARY KEY (NumPlaignant)
